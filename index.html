@@ -11,9 +11,24 @@
   <script src='fullcalendar.js'></script>
   <script src='scheduler.js'></script>
   <script src='zh-cn.js'></script>
+  <script type="text/javascript" src="vue.js"></script>
+  <style type="text/css">
+    .fc .fc-widget-header {
+      height: 70px;
+      vertical-align: middle;
+    }
+    .fc-license-message {
+      display: none;
+    }
+    .fc-resource-cell {
+      /*background-color: red;*/
+    }
+  </style>
 </head>
-<body>
+<body id="app">
 
+<button @click="change">change</button>
+<button @click="change1">change1</button>
 
   <div id='calendar'></div>
 
@@ -21,72 +36,180 @@
   <script type="text/javascript">
 
 
-  $(function() { // document ready
-
-    $('#calendar').fullCalendar({
-      defaultView: 'agendaWeek',
-      defaultDate: '2016-09-07',
-      editable: true,
-      selectable: true,
-      eventLimit: true, // allow "more" link when too many events
-      header: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'agendaDay,agendaTwoDay,agendaWeek,month'
-      },
-      locale: 'zh-cn',
-      views: {
-        agendaTwoDay: {
-          type: 'agenda',
-          duration: { days: 2 },
-
-          // views that are more than a day will NOT do this behavior by default
-          // so, we need to explicitly enable it
-          groupByResource: true
-
-          //// uncomment this line to group by day FIRST with resources underneath
-          //groupByDateAndResource: true
+  var vm = new Vue({
+    el: '#app',
+    data: {
+      businessHours: [
+        {
+          dow: [ 1, 2, 3 ], // Monday, Tuesday, Wednesday
+          start: '08:00:00', // 8am
+          end: '18:00:00', // 6pm
+        },
+        {
+          dow: [ 4, 5, 6, 0 ], // Thursday, Friday
+          start: '10:00', // 10am
+          end: '12:00' // 4pm
+        },
+        {
+          dow: [ 6, 0 ],
+          start: '14:10:00', // 10am
+          end: '16:10:00' // 4pm
         }
-      },
-
-      //// uncomment this line to hide the all-day slot
-      //allDaySlot: false,
-
-      resources: [
-        { id: 'a', title: 'Room A' },
-        { id: 'b', title: 'Room B', eventColor: 'green' },
-        { id: 'c', title: 'Room C', eventColor: 'orange' },
-        { id: 'd', title: 'Room D', eventColor: 'red' }
       ],
-      events: [
-        { id: '1', resourceId: 'a', start: '2016-09-05', end: '2016-09-07', title: '看电影' },
-        { id: '2', resourceId: 'a', start: '2016-09-07T09:00:00', end: '2016-09-07T10:00:00', title: '吃饭' },
-
-        { id: '3', resourceId: 'b', start: '2016-09-07T12:00:00', end: '2016-09-08T06:00:00', title: 'event 3' },
-        { id: '4', resourceId: 'c', start: '2016-09-07T07:30:00', end: '2016-09-07T09:30:00', title: 'event 4' },
-        { id: '5', resourceId: 'd', start: '2016-09-07T10:00:00', end: '2016-09-07T15:00:00', title: 'event 5' },
-        { id: '6', resourceId: 'a', start: '2016-09-07T09:00:00', end: '2016-09-07T10:00:00', title: '洗澡' },
-        { id: '7', resourceId: 'd', start: '2016-09-07T10:00:00', end: '2016-09-07T15:00:00', title: 'event 6' }
-      ],
-
-      select: function(start, end, jsEvent, view, resource) {
-        console.log(
-          'select',
-          start.format(),
-          end.format(),
-          resource ? resource.id : '(no resource)'
-        );
+      initRender: 1
+    },
+    methods: {
+      change: function () {
+        $('#calendar').fullCalendar('option', {
+          businessHours: [
+            {
+              dow: [ 0 ],
+              start: '09:10:00', // 10am
+              end: '11:10:00' // 4pm
+            },
+            {
+              dow: [ 0 ],
+              start: '15:10:00', // 10am
+              end: '18:10:00' // 4pm
+            }
+          ]
+        });
       },
-      dayClick: function(date, jsEvent, view, resource) {
-        console.log(
-          'dayClick',
-          date.format(),
-          resource ? resource.id : '(no resource)'
-        );
+      change1: function () {
+        $('#calendar').fullCalendar('option', {
+          businessHours: [
+            {
+              dow: [ 1, 2, 3 ], // Monday, Tuesday, Wednesday
+              start: '18:30:00', // 8am
+              end: '19:00:00', // 6pm
+            },
+            {
+              dow: [ 4, 5 ], // Thursday, Friday
+              start: '10:20', // 10am
+              end: '16:00' // 4pm
+            },
+            {
+              dow: [ 0 ],
+              start: '09:10:00', // 10am
+              end: '11:10:00' // 4pm
+            },
+            {
+              dow: [ 0 ],
+              start: '15:10:00', // 10am
+              end: '18:10:00' // 4pm
+            }
+          ]
+        });
+      },
+      initCalendar: function() {
+        var that = this;
+        $('#calendar').fullCalendar({
+          defaultView: 'agendaWeek',
+          defaultDate: '2016-09-07',
+          editable: true,
+          selectable: true,
+          eventLimit: true, // allow "more" link when too many events
+          header: {
+            left: 'today prev,next',
+            center: 'title',
+            right: 'agendaDay,agendaWeek,month'
+          },
+          locale: 'zh-cn',
+          views: {
+            agendaTwoDay: {
+              type: 'agenda',
+              duration: { days: 2 },
+
+              // views that are more than a day will NOT do this behavior by default
+              // so, we need to explicitly enable it
+              groupByResource: true
+
+              //// uncomment this line to group by day FIRST with resources underneath
+              //groupByDateAndResource: true
+            }
+          },
+
+          //// uncomment this line to hide the all-day slot
+          allDaySlot: false,
+
+          resources: [
+            { id: 'a', title: 'Room A' },
+            { id: 'b', title: 'Room B', eventColor: 'green' },
+            { id: 'c', title: 'Room C', eventColor: 'orange' },
+            { id: 'd', title: 'Room D', eventColor: 'red' }
+          ],
+          events: [
+            { id: '1', resourceId: 'a', start: '2016-09-05', end: '2016-09-07', title: '看电影' },
+            { id: '2', resourceId: 'a', start: '2016-09-07T09:00:00', end: '2016-09-07T10:00:00', title: '吃饭' },
+
+            { id: '3', resourceId: 'b', start: '2016-09-07T12:00:00', end: '2016-09-08T06:00:00', title: 'event 3' },
+            { id: '4', resourceId: 'c', start: '2016-09-07T07:30:00', end: '2016-09-07T09:30:00', title: 'event 4' },
+            { id: '5', resourceId: 'd', start: '2016-09-07T10:00:00', end: '2016-09-07T15:00:00', title: 'event 5' },
+            { id: '6', resourceId: 'a', start: '2016-09-07T09:00:00', end: '2016-09-07T10:00:00', title: '洗澡' },
+            { id: '7', resourceId: 'd', start: '2016-09-07T10:00:00', end: '2016-09-07T15:00:00', title: 'event 6' }
+          ],
+          businessHours: this.businessHours,
+
+          minTime: '06:00:00',  // 一天的开始时间
+          maxTime: '19:00:00',  // 一天的结束时间
+          weekNumbers: true, // 显示一年中周数
+
+          slotLabelFormat: 'H:mm',  // 左边时间24小时制
+          slotDuration: '00:10:00',
+
+          select: function(start, end, jsEvent, view, resource) {
+            console.log(
+              'select',
+              start.format(),
+              end.format(),
+              resource ? resource.id : '(no resource)'
+            );
+          },
+          dayClick: function(date, jsEvent, view, resource) {
+            console.log(
+              'dayClick',
+              date.format(),
+              resource ? resource.id : '(no resource)'
+            );
+          },
+          viewRender: function(view, element){
+            console.log(that.initRender);
+            if (that.initRender === 1) {
+              that.initRender = 2;
+              return;
+            }
+            var view = view.end.subtract(1, 'days').format('YYYY-MM-DD');
+            console.log(view);
+            $('#calendar').fullCalendar('option', {
+              businessHours: [
+              {
+                dow: [ 1 ],
+                start: '12:00',
+                end: '20:00'
+              },
+              {
+                dow: [ 0 ],
+                start: '08:00',
+                end: '12:00'
+              }
+              ]
+            });
+          },
+          // events:function(start, end, callback){
+          //   console.log(start);
+          // }
+        });
       }
-    });
-
+    },
+    ready: function() {
+      this.initCalendar();
+    }
   });
+
+
+
+
+
 
 
 
